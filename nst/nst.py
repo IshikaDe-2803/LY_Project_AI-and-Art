@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
 from PIL import Image
 from io import BytesIO
@@ -8,20 +7,14 @@ from gan import G_BA
 from cartoonizer import G_model
 import os
 import torch
-import torch.nn as nn
-import cv2
-import matplotlib.pyplot as plt
 import torchvision.transforms as transforms
 from PIL import Image
 from nst_script import main_style_transfer
-from tensorflow.keras.optimizers import Adam
+from tensorflow.python.keras.optimizer_v2.adam import Adam
 import tensorflow as tf
-import tensorflow_hub as hub
-import IPython.display as display
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
-import PIL.Image
 
 os.environ['TFHUB_MODEL_LOAD_FORMAT'] = 'COMPRESSED'
 mpl.rcParams['figure.figsize'] = (12, 12)
@@ -46,7 +39,7 @@ def convert_image(img):
 
 def stylize(image_url, style, epochs):
     if style_option == 'Custom Style':
-        opt = tf.keras.optimizers.Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
+        opt =  Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
         result = main_style_transfer(image_url, style, opt, epochs)
         result.save(os.path.join('./', 'stylized.png'))
         return
@@ -56,6 +49,8 @@ def stylize(image_url, style, epochs):
         g = load_checkpoint('./vangogh.ckpt')
     if style_option == 'Monet':
         g = load_checkpoint('./monet.ckpt')
+    if style_option == 'CycleGAN Indian':
+        g = load_checkpoint('./current_80.ckpt')
     if style_option == 'Indian Comic Style':
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         checkpoint = torch.load('./comic.pth', map_location=torch.device(device))
@@ -65,8 +60,6 @@ def stylize(image_url, style, epochs):
         your_image_size = 256  # Replace with the size expected by your generator model
         preprocess = transforms.Compose([
             transforms.Resize(your_image_size),
-            transforms.CenterCrop(your_image_size),
-
             transforms.ToTensor(),
         ])
         image = Image.open(image_path).convert('RGB')
@@ -124,7 +117,7 @@ col1, col2 = st.columns(2)
 
 style_option = st.sidebar.selectbox(
     'Select the style that you want:',
-    ('Van Gogh', 'Ukiyoe', 'Monet', 'Indian Comic Style', 'Custom Style'))
+    ('Van Gogh', 'Ukiyoe', 'Monet', 'Indian Comic Style', 'Custom Style','CycleGAN Indian'))
 
 content_image = st.sidebar.file_uploader("Upload a input image :camera:", type=["png", "jpg", "jpeg"], key=1)
 

@@ -1,7 +1,5 @@
 import os
 import tensorflow as tf
-import tensorflow_hub as hub
-import IPython.display as display
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
