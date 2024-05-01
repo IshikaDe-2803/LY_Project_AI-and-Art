@@ -1,6 +1,8 @@
 # LY_Project_AI-and-Art
 The technical aspects of the NeuralArt web application, built using Streamlit, a Python framework, that allows users to convert uploaded images into various artistic styles. This manual is geared towards developers familiar with Python, Streamlit, and core machine learning concepts.
 
+![alt text](https://github.com/IshikaDe-2803/LY_Project_AI-and-Art/blob/master/poster.png "Poster")
+
 ## System Requirements
 * Python (version 3.7 or higher)
 * Streamlit (latest stable version)
