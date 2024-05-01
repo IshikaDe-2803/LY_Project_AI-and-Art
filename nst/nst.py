@@ -8,13 +8,15 @@ from cartoonizer import G_model
 import os
 import torch
 import torchvision.transforms as transforms
-from PIL import Image
 from nst_script import main_style_transfer
 from tensorflow.python.keras.optimizer_v2.adam import Adam
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
+import cv2
+from metrics import evaluate_result
+from PIL import ImageEnhance
 
 os.environ['TFHUB_MODEL_LOAD_FORMAT'] = 'COMPRESSED'
 mpl.rcParams['figure.figsize'] = (12, 12)
@@ -66,7 +68,9 @@ def stylize(image_url, style, epochs):
         image_tensor = preprocess(image).unsqueeze(0).to(device)
         result_image_best_checkpoint = G_inference(image_tensor)
         result_image_pil = transforms.ToPILImage()(result_image_best_checkpoint.squeeze(0).cpu())
-        result_image_pil.save(os.path.join('./', 'stylized.png'))
+        brightness_enhancer = ImageEnhance.Brightness(result_image_pil)
+        brightened_image = brightness_enhancer.enhance(factor=2.5)  # Adjust factor for brightness level
+        brightened_image.save(os.path.join('./', 'stylized.png'))
         return
 
     G_BA.load_state_dict(g['G_BA'])
@@ -80,7 +84,7 @@ def stylize(image_url, style, epochs):
     G_BA.eval()
 
     imgs = []
-    img = Image.open(image_url)
+    img = Image.open(image_url).convert('RGB')
     img = generate_transforms(img)
     imgs.append(img)
     imgs = torch.stack(imgs, 0).type(Tensor)
@@ -102,7 +106,13 @@ def fix_image(content, style, isContent = False, epochs = 10):
         output_image = Image.open('./stylized.png')
         col2.write("Stylized Image :art:")
         col2.image(output_image)
-
+        result_image = cv2.imread('./stylized.png')
+        variance, saturation, coarseness, edge_density, shape_comp = evaluate_result(result_image)
+        st.write("Colour Variance: ", variance)
+        st.write("Saturation: ", saturation)
+        st.write("Coarseness: ", coarseness)
+        st.write("Edge Density: ", edge_density)
+        st.write("Shape Complexity: ", shape_comp)
         st.sidebar.markdown("\n")
 
         output_image = convert_image(output_image)
